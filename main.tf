@@ -14,8 +14,8 @@ provider "shoreline" {
   debug = true
 }
 
-module "kafka_unauthorized_access_due_to_kafka_acl_misconfiguration" {
-  source    = "./modules/kafka_unauthorized_access_due_to_kafka_acl_misconfiguration"
+module "kafka_unauthorized_access" {
+  source    = "./modules/kafka_unauthorized_access"
 
   providers = {
     shoreline = shoreline

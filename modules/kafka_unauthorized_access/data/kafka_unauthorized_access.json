@@ -1,0 +1,134 @@
+{
+  "name": "kafka_unauthorized_access",
+  "description": "This incident type refers to a situation where an unauthorized user gains access to a Kafka cluster due to misconfigured Access Control Lists (ACLs) in Kafka. This can result in potential data breaches or other security issues, as the unauthorized user may be able to read, write or modify data within the Kafka cluster. The incident typically requires immediate attention and remediation to prevent further unauthorized access.",
+  "params": [
+    {
+      "name": "AUTHORIZED_USERS",
+      "value": ""
+    },
+    {
+      "name": "ZOOKEEPER_HOST",
+      "value": ""
+    },
+    {
+      "name": "USER_NAME",
+      "value": ""
+    },
+    {
+      "name": "TOPIC_NAME",
+      "value": ""
+    },
+    {
+      "name": "ZOOKEEPER_PORT",
+      "value": ""
+    },
+    {
+      "name": "KAFKA_CONFIG_FILE",
+      "value": ""
+    },
+    {
+      "name": "HOST_NAME",
+      "value": ""
+    },
+    {
+      "name": "K8S_CLUSTER_NAME",
+      "value": ""
+    },
+    {
+      "name": "NAMESPACE",
+      "value": ""
+    }
+  ],
+  "cells": [
+    {
+      "name": "cell_1",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Kafka Unauthorized Access\nThis incident type refers to a situation where an unauthorized user gains access to a Kafka cluster due to misconfigured Access Control Lists (ACLs) in Kafka. This can result in potential data breaches or other security issues, as the unauthorized user may be able to read, write or modify data within the Kafka cluster. The incident typically requires immediate attention and remediation to prevent further unauthorized access."
+    },
+    {
+      "name": "cell_2",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check if Kafka is running"
+    },
+    {
+      "name": "cell_3",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `systemctl status kafka`"
+    },
+    {
+      "name": "cell_4",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check if the Kafka ACLs are configured correctly"
+    },
+    {
+      "name": "cell_5",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `kafka-acls.sh --list --authorizer-properties zookeeper.connect=${ZOOKEEPER_HOST}:${ZOOKEEPER_PORT}`"
+    },
+    {
+      "name": "cell_6",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check Kafka's logs for any errors"
+    },
+    {
+      "name": "cell_7",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `journalctl -u kafka | tail`"
+    },
+    {
+      "name": "cell_8",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check if the proper Kafka ACLs are set up for the user's role"
+    },
+    {
+      "name": "cell_9",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `kafka-acls.sh --describe --topic ${TOPIC_NAME} --authorizer-properties zookeeper.connect=${ZOOKEEPER_HOST}:${ZOOKEEPER_PORT}`"
+    },
+    {
+      "name": "cell_10",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check if the user has the correct Kafka ACLs to access the topic"
+    },
+    {
+      "name": "cell_11",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `kafka-acls.sh --list --topic ${TOPIC_NAME} --authorizer-properties zookeeper.connect=${ZOOKEEPER_HOST}:${ZOOKEEPER_PORT}`"
+    },
+    {
+      "name": "cell_12",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check if the user's Kafka credentials are set up correctly"
+    },
+    {
+      "name": "cell_13",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `kafka-configs.sh --describe --entity-type users --entity-name ${USER_NAME} --authorizer-properties zookeeper.connect=${ZOOKEEPER_HOST}:${ZOOKEEPER_PORT}`"
+    },
+    {
+      "name": "cell_14",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check and review the Kafka ACL configuration to ensure that permissions are set up correctly for the intended users and groups. You may need to update the configuration to limit access to only authorized users and groups."
+    },
+    {
+      "name": "cell_15",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "host | host_name=$HOST_NAME | invoke_kafka_acl_config($AUTHORIZED_USERS, $KAFKA_CONFIG_FILE)"
+    }
+  ]
+}
